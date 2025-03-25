@@ -107,55 +107,112 @@ async function getLocationNameFromCoords(lat, lng) {
 // Function to generate date ideas using Gemini API
 async function generateDateIdeas(locationData, radius, preferences = {}) {
 	try {
-		// Initialize the Gemini API
+		// Initialize and validate Gemini API as before
 		const genAI = initGeminiAPI();
 		if (!genAI) {
 			throw new Error('Failed to initialize Gemini API');
 		}
 
-		// Get the Gemini model
 		const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-		// Create the prompt with all relevant information
+		// Base prompt as before
 		let prompt = `Generate 5 unique and interesting date ideas near ${locationData.locationName} within ${radius} miles radius.`;
 
-		// Add any additional preferences to the prompt
-		if (preferences.dateType) {
-			prompt += ` Date type: ${preferences.dateType}.`;
-		}
+		// Add preferences to prompt as before
+		if (preferences.dateType) prompt += ` Date type: ${preferences.dateType}.`;
+		if (preferences.budget) prompt += ` Budget: ${preferences.budget}.`;
+		if (preferences.environment) prompt += ` Environment: ${preferences.environment}.`;
+		if (preferences.relationshipStage) prompt += ` Relationship stage: ${preferences.relationshipStage}.`;
 
-		if (preferences.budget) {
-			prompt += ` Budget: ${preferences.budget}.`;
-		}
+		// Add specific instructions for JSON format
+		prompt += `
+Please return your response in ONLY the following JSON format without any additional text:
+{
+  "analysis": "A brief analysis of the date ideas based on location and preferences",
+  "ideas": [
+    {
+      "title": "Descriptive title for the date idea",
+      "description": "Detailed description including what makes this special",
+      "location": "Specific venue name if applicable",
+      "address": "Full address if available",
+      "cost": "Estimated cost or cost range"
+    },
+    ... more ideas (4 more total)
+  ]
+}
+Include real locations and venues when possible. Make sure the output is valid JSON.`;
 
-		if (preferences.environment) {
-			prompt += ` Environment: ${preferences.environment}.`;
-		}
-
-		if (preferences.relationshipStage) {
-			prompt += ` Relationship stage: ${preferences.relationshipStage}.`;
-		}
-
-		// Add request for real locations and specifics
-		prompt += ` Please include real locations, restaurants, parks, or venues in this area with specific details about what makes each date idea special. Format each idea with a title, description, and any relevant details like address or cost range.`;
-
-		console.log('Sending prompt to Gemini:', prompt);
-
-		// Generate content using the Gemini API
+		// Generate content
 		const result = await model.generateContent({
 			contents: [{ role: "user", parts: [{ text: prompt }] }],
 		});
 
-		const response = result.response;
-		return response.text();
+		// Parse JSON from the response
+		const responseText = result.response.text();
+		console.log('Raw response:', responseText);
+
+		return JSON.parse(removeMarkdownCodeBlock(responseText));
 	} catch (error) {
 		console.error('Error generating date ideas:', error);
 		throw error;
 	}
 }
 
+function removeMarkdownCodeBlock(text) {
+	// Remove the opening ```json (and any whitespace after it)
+	let cleanedText = text.replace(/^```json\s*/m, '');
+
+	// Remove the closing ``` (and any whitespace before it)
+	cleanedText = cleanedText.replace(/\s*```$/m, '');
+
+	return cleanedText;
+}
+
+// Add this function to handle parsing the response
+function parseAIResponse(responseText) {
+	try {
+		// First attempt: Try direct parsing in case it's already clean JSON
+		return JSON.parse(responseText);
+	} catch (e) {
+		// Second attempt: Look for JSON in code blocks
+		const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+		if (jsonMatch && jsonMatch[1]) {
+			try {
+				return JSON.parse(jsonMatch[1]);
+			} catch (e2) {
+				console.error('Failed to parse JSON from code block', e2);
+			}
+		}
+
+		// Final fallback: Create structured format from unstructured text
+		console.warn('Falling back to text parsing');
+		const ideas = responseText.split(/\d+\./)
+			.filter(idea => idea.trim().length > 0)
+			.map(idea => {
+				const lines = idea.trim().split('\n');
+				return {
+					title: lines[0] || 'Date Idea',
+					description: lines.slice(1).join('\n').trim() || 'No description available',
+					location: 'N/A',
+					address: 'N/A',
+					cost: 'N/A'
+				};
+			});
+
+		return {
+			analysis: "Here are some date ideas based on your preferences:",
+			ideas: ideas
+		};
+	}
+}
+
 // Function to display generated date ideas
-function displayDateIdeas(ideas) {
+function displayDateIdeas(responseData) {
+	// Parse the response if it's not already parsed
+	const ideasData = typeof responseData === 'string'
+		? parseAIResponse(responseData)
+		: responseData;
+
 	// Hide loading indicator
 	const loadingContainer = document.getElementById('loading');
 	if (loadingContainer) {
@@ -168,16 +225,55 @@ function displayDateIdeas(ideas) {
 		resultsContainer.style.display = 'block';
 	}
 
+	// Update subheader with analysis
+	const resultsSubheader = document.querySelector('.results-subheader');
+	if (resultsSubheader && ideasData.analysis) {
+		resultsSubheader.textContent = ideasData.analysis;
+	}
+
 	// Fill date ideas
 	const dateIdeasContainer = document.getElementById('date-ideas');
-	if (dateIdeasContainer) {
-		// Parse the ideas text and format it for display
-		const formattedIdeas = formatDateIdeas(ideas);
-		dateIdeasContainer.innerHTML = formattedIdeas;
+	if (dateIdeasContainer && ideasData.ideas) {
+		let html = '';
+
+		ideasData.ideas.forEach(idea => {
+			html += `
+        <div class="date-idea-card">
+          <div class="date-idea-image">Date Idea</div>
+          <div class="date-idea-content">
+            <h3 class="date-idea-title">${escapeHtml(idea.title)}</h3>
+            <p class="date-idea-description">${escapeHtml(idea.description)}</p>
+            
+            <div class="date-idea-details">
+              ${idea.location && idea.location !== 'N/A' ?
+					`<p><strong>Location:</strong> ${escapeHtml(idea.location)}</p>` : ''}
+              
+              ${idea.address && idea.address !== 'N/A' ?
+					`<p><strong>Address:</strong> ${escapeHtml(idea.address)}</p>` : ''}
+              
+              ${idea.cost && idea.cost !== 'N/A' ?
+					`<p><strong>Cost:</strong> ${escapeHtml(idea.cost)}</p>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+		});
+
+		dateIdeasContainer.innerHTML = html;
 	}
 
 	// Scroll to results
 	resultsContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Helper function to prevent XSS
+function escapeHtml(str) {
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
 }
 
 // Function to format date ideas for display
@@ -269,10 +365,10 @@ async function handleGenerateClick(event) {
 		}
 
 		// Generate date ideas
-		const ideas = await generateDateIdeas(locationData, radius, preferences);
+		const response = await generateDateIdeas(locationData, radius, preferences);
+		console.log('Generated response:', response);
+		displayDateIdeas(response);
 
-		// Display the results
-		displayDateIdeas(ideas);
 	} catch (error) {
 		console.error('Error:', error);
 		alert(`Error: ${error.message}`);
