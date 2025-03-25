@@ -3,7 +3,9 @@
 // This avoids the need to import it as an ES module
 
 // Initialize variables
-let map;
+import { initMapWithLocation } from './map.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 let userLocation = null;
 
 // Function to initialize the Gemini API
@@ -30,16 +32,42 @@ function initGeminiAPI() {
 
 // Function to initialize the map
 function initMap(lat, lng) {
-	// Code for map initialization would go here
-	console.log(`Map initialized at: ${lat}, ${lng}`);
+	// Remove the console log and placeholder code
+	// console.log(`Map initialized at: ${lat}, ${lng}`);
+	// const mapPlaceholder = document.querySelector('.map-placeholder');
+	// if (mapPlaceholder) {
+	//   mapPlaceholder.innerHTML = `<div>Map loaded at coordinates: ${lat}, ${lng}</div>`;
+	// }
 
-	// Display the map in the container
-	const mapPlaceholder = document.querySelector('.map-placeholder');
-	if (mapPlaceholder) {
-		mapPlaceholder.innerHTML = `<div>Map loaded at coordinates: ${lat}, ${lng}</div>`;
-	}
+	// Instead, use the map.js function
+
+	initMapWithLocation(lat, lng);
 
 	userLocation = { lat, lng };
+}
+
+// Update the handleGpsClick function
+async function handleGpsClick() {
+	const gpsBtn = document.getElementById('use-gps-btn');
+
+	try {
+		// Add loading animation to the GPS button
+		gpsBtn.classList.add('gps-loading');
+
+		const position = await getCurrentLocation();
+
+		// Initialize map with the current location
+		initMap(position.lat, position.lng);
+
+		// The location name will be populated by map.js reverse geocoding
+		// No need to call getLocationNameFromCoords here
+	} catch (error) {
+		console.error('Error getting location:', error);
+		alert('Could not get your location. Please enter it manually.');
+	} finally {
+		// Remove loading animation
+		gpsBtn.classList.remove('gps-loading');
+	}
 }
 
 // Function to get current location using the browser's geolocation API
@@ -257,30 +285,6 @@ async function handleGenerateClick(event) {
 		// Reset button state
 		generateBtn.textContent = 'Generate Date Ideas →';
 		generateBtn.disabled = false;
-	}
-}
-
-// Event handler for the GPS button
-async function handleGpsClick() {
-	const gpsBtn = document.getElementById('use-gps-btn');
-
-	try {
-		// Add loading animation to the GPS button
-		gpsBtn.classList.add('gps-loading');
-
-		const position = await getCurrentLocation();
-		// Initialize map with the current location
-		initMap(position.lat, position.lng);
-
-		// Get and display the location name
-		const locationName = await getLocationNameFromCoords(position.lat, position.lng);
-		document.getElementById('location-input').value = locationName;
-	} catch (error) {
-		console.error('Error getting location:', error);
-		alert('Could not get your location. Please enter it manually.');
-	} finally {
-		// Remove loading animation
-		gpsBtn.classList.remove('gps-loading');
 	}
 }
 
