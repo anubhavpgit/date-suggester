@@ -1,0 +1,310 @@
+:root {
+	--primary-color: #E94747;
+	--text-color: #333;
+	--light-text: #666;
+	--white: #fff;
+	--background: #fff;
+	--border-radius: 8px;
+	--box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Inter', sans-serif;
+	color: var(--text-color);
+	background-color: var(--background);
+	line-height: 1.6;
+}
+
+.container {
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+/* Navigation */
+.navbar {
+	background-color: var(--primary-color);
+	padding: 15px 0;
+	position: relative;
+	z-index: 100;
+}
+
+.navbar .container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.logo a {
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+	color: var(--white);
+	font-weight: 700;
+	font-size: 1.5rem;
+}
+
+.logo svg {
+	margin-right: 8px;
+}
+
+.nav-links {
+	display: flex;
+	gap: 20px;
+}
+
+.nav-links a {
+	color: var(--white);
+	text-decoration: none;
+	font-size: 1rem;
+	transition: opacity 0.3s;
+}
+
+.nav-links a:hover {
+	opacity: 0.8;
+}
+
+.nav-right {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.language-selector {
+	display: flex;
+	align-items: center;
+	color: var(--white);
+	gap: 5px;
+	cursor: pointer;
+}
+
+.btn-get-started {
+	background-color: var(--white);
+	color: var(--primary-color);
+	padding: 8px 16px;
+	border-radius: var(--border-radius);
+	text-decoration: none;
+	font-weight: 600;
+	transition: background-color 0.3s;
+}
+
+.btn-get-started:hover {
+	background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Hero Section */
+.hero {
+	padding: 80px 0;
+	text-align: center;
+	position: relative;
+	overflow: hidden;
+}
+
+.background-curve {
+	position: absolute;
+	top: -300px;
+	right: -300px;
+	width: 800px;
+	height: 800px;
+	border-radius: 50%;
+	border: 1px solid rgba(233, 71, 71, 0.1);
+	z-index: -1;
+}
+
+.background-curve::before {
+	content: '';
+	position: absolute;
+	top: 100px;
+	left: 100px;
+	width: 600px;
+	height: 600px;
+	border-radius: 50%;
+	border: 1px solid rgba(233, 71, 71, 0.1);
+}
+
+.hero-content {
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+h1 {
+	font-size: 3.5rem;
+	margin-bottom: 20px;
+	font-weight: 700;
+}
+
+.hero-text {
+	font-size: 1.5rem;
+	margin-bottom: 30px;
+	color: var(--text-color);
+}
+
+.brand-name {
+	font-weight: 600;
+}
+
+.highlight {
+	font-weight: 600;
+}
+
+.btn-get-started-hero {
+	display: inline-block;
+	background-color: var(--primary-color);
+	color: var(--white);
+	padding: 15px 30px;
+	border-radius: var(--border-radius);
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 1.1rem;
+	transition: background-color 0.3s;
+}
+
+.btn-get-started-hero:hover {
+	background-color: #d43b3b;
+}
+
+/* As Seen On Section */
+.as-seen-on {
+	padding: 60px 0;
+	text-align: center;
+}
+
+.as-seen-on h2 {
+	font-size: 1.5rem;
+	color: var(--light-text);
+	margin-bottom: 40px;
+	font-weight: 500;
+}
+
+.media-logos {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 60px;
+	flex-wrap: wrap;
+}
+
+.logo-item {
+	opacity: 0.8;
+	transition: opacity 0.3s;
+}
+
+.logo-item:hover {
+	opacity: 1;
+}
+
+/* Hide the actual images since we don't have them */
+.logo-item img {
+	display: none;
+}
+
+/* Create placeholders for the logos */
+.logo-wsj::after {
+	content: "WSJ";
+	font-family: serif;
+	font-weight: bold;
+	font-size: 2rem;
+}
+
+.logo-wp::after {
+	content: "The Washington Post";
+	font-family: serif;
+	font-weight: bold;
+	font-size: 1.2rem;
+}
+
+.logo-npr::after {
+	content: "NPR";
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 1.5rem;
+}
+
+.logo-fox::after {
+	content: "FOX";
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 2rem;
+}
+
+.logo-nbc::after {
+	content: "NBC";
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 2rem;
+}
+
+/* Testimonials Section */
+.testimonials {
+	padding: 40px 0 80px;
+}
+
+.testimonial-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 30px;
+}
+
+.testimonial-card {
+	background-color: #f9f9f9;
+	padding: 30px;
+	border-radius: var(--border-radius);
+	box-shadow: var(--box-shadow);
+}
+
+.testimonial-card p {
+	font-size: 1.1rem;
+	line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+	.nav-links {
+		display: none;
+	}
+
+	h1 {
+		font-size: 3rem;
+	}
+}
+
+@media (max-width: 768px) {
+	h1 {
+		font-size: 2.5rem;
+	}
+
+	.hero-text {
+		font-size: 1.2rem;
+	}
+
+	.media-logos {
+		gap: 30px;
+	}
+}
+
+@media (max-width: 480px) {
+	.navbar .container {
+		flex-direction: column;
+		gap: 15px;
+	}
+
+	.nav-right {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	h1 {
+		font-size: 2rem;
+	}
+
+	.testimonial-grid {
+		grid-template-columns: 1fr;
+	}
+}

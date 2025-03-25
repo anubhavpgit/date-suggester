@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DateSuggester.ai - AI-Powered Date Ideas</title>
+	<link rel="stylesheet" href="./styles.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+</head>
+
+<body>
+	<header>
+		<nav class="navbar">
+			<div class="container">
+				<div class="logo">
+					<a href="/">
+						<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M15 2.5C8.1 2.5 2.5 8.1 2.5 15C2.5 21.9 8.1 27.5 15 27.5C21.9 27.5 27.5 21.9 27.5 15C27.5 8.1 21.9 2.5 15 2.5Z"
+								fill="white" />
+							<path
+								d="M15 5C15 5 7 9 7 15C7 18.5 9 21.5 12.5 21.5C14.5 21.5 15 20 15 20C15 20 15.5 21.5 17.5 21.5C21 21.5 23 18.5 23 15C23 9 15 5 15 5Z"
+								fill="#E94747" />
+						</svg>
+						<span>datesuggester.ai</span>
+					</a>
+				</div>
+				<div class="nav-links">
+					<a href="#">Date Ideas</a>
+					<a href="#">Romantic Spots</a>
+					<a href="#">Activity Finder</a>
+					<a href="#">Date Planner</a>
+					<a href="#">Blog</a>
+					<a href="#">About</a>
+				</div>
+				<div class="nav-right">
+					<div class="language-selector">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+								stroke="white" stroke-width="2" />
+							<path d="M2 12H22" stroke="white" stroke-width="2" />
+							<path
+								d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z"
+								stroke="white" stroke-width="2" />
+						</svg>
+						<span>EN</span>
+					</div>
+					<a href="#" class="btn-get-started">Get Started</a>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<main>
+		<section class="hero">
+			<div class="container">
+				<div class="hero-content">
+					<h1>Planning dates shouldn't be stressful</h1>
+					<p class="hero-text">
+						<span class="brand-name">DateSuggester AI</span>
+						<span class="highlight">creates perfect date ideas</span>
+						and gives you
+						<span class="highlight">personalized recommendations</span>.
+						So you can spend less time planning, and more time connecting.
+					</p>
+					<a href="#date-generator" class="btn-get-started-hero">Get date ideas →</a>
+				</div>
+			</div>
+			<div class="background-curve"></div>
+		</section>
+
+		<section id="date-generator" class="date-generator">
+			<div class="container">
+				<h2>Generate Your Perfect Date</h2>
+				<div class="generator-form">
+					<div class="form-row">
+						<div class="form-group">
+							<label for="date-type">Date Type</label>
+							<select id="date-type" class="form-control">
+								<option value="romantic">Romantic</option>
+								<option value="casual">Casual</option>
+								<option value="adventure">Adventure</option>
+								<option value="cultural">Cultural</option>
+								<option value="foodie">Foodie</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="budget">Budget</label>
+							<select id="budget" class="form-control">
+								<option value="free">Free</option>
+								<option value="low">Low ($)</option>
+								<option value="medium">Medium ($$)</option>
+								<option value="high">High ($$$)</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group">
+							<label for="location">Location Type</label>
+							<select id="location" class="form-control">
+								<option value="indoor">Indoor</option>
+								<option value="outdoor">Outdoor</option>
+								<option value="both">Both</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="time">Time of Day</label>
+							<select id="time" class="form-control">
+								<option value="morning">Morning</option>
+								<option value="afternoon">Afternoon</option>
+								<option value="evening">Evening</option>
+								<option value="night">Night</option>
+							</select>
+						</div>
+					</div>
+					<button id="generate-btn" class="btn-generate">Generate Date Ideas</button>
+				</div>
+
+				<div id="results" class="results-container">
+					<div class="results-header">
+						<h3>Your Personalized Date Ideas</h3>
+						<p class="results-subheader">Based on your preferences, here are some perfect date ideas:</p>
+					</div>
+					<div id="date-ideas" class="date-ideas-grid">
+						<!-- Date ideas will be populated here by JavaScript -->
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="as-seen-on">
+			<div class="container">
+				<h2>as seen on</h2>
+				<div class="media-logos">
+					<div class="logo-item">
+						<div class="logo-wsj"></div>
+					</div>
+					<div class="logo-item">
+						<div class="logo-wp"></div>
+					</div>
+					<div class="logo-item">
+						<div class="logo-npr"></div>
+					</div>
+					<div class="logo-item">
+						<div class="logo-fox"></div>
+					</div>
+					<div class="logo-item">
+						<div class="logo-nbc"></div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="testimonials">
+			<div class="container">
+				<div class="testimonial-grid">
+					<div class="testimonial-card">
+						<p>"The date ideas were so creative! My partner was impressed that I came up with something so unique.
+							Little did they know I had help from DateSuggester."</p>
+					</div>
+					<div class="testimonial-card">
+						<p>"I was tired of suggesting the same dinner and movie every weekend. DateSuggester helped me find
+							activities I never would have thought of, and now our dates are something we both look forward to."</p>
+					</div>
+					<div class="testimonial-card">
+						<p>"DateSuggester bills itself as an antidote to 'stressful' date planning that allows users to spend less
+							time brainstorming, and more time enjoying quality moments together."</p>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="footer">
+		<div class="container">
+			<div class="footer-content">
+				<div class="footer-logo">
+					<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M15 2.5C8.1 2.5 2.5 8.1 2.5 15C2.5 21.9 8.1 27.5 15 27.5C21.9 27.5 27.5 21.9 27.5 15C27.5 8.1 21.9 2.5 15 2.5Z"
+							fill="white" />
+						<path
+							d="M15 5C15 5 7 9 7 15C7 18.5 9 21.5 12.5 21.5C14.5 21.5 15 20 15 20C15 20 15.5 21.5 17.5 21.5C21 21.5 23 18.5 23 15C23 9 15 5 15 5Z"
+							fill="#E94747" />
+					</svg>
+					<span>datesuggester.ai</span>
+				</div>
+				<p class="footer-text">© 2023 DateSuggester AI. All rights reserved.</p>
+			</div>
+		</div>
+	</footer>
+
+	<script src="script.js"></script>
+</body>
+
+</html>
