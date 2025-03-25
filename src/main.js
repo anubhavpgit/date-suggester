@@ -149,7 +149,6 @@ Include real locations and venues when possible. Make sure the output is valid J
 
 		// Parse JSON from the response
 		const responseText = result.response.text();
-		console.log('Raw response:', responseText);
 
 		return JSON.parse(removeMarkdownCodeBlock(responseText));
 	} catch (error) {
