@@ -2,6 +2,7 @@
 const path = require('path');
 const Dotenv = require('dotenv-webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
 	entry: './src/main.js',
@@ -32,9 +33,23 @@ module.exports = {
 		new Dotenv(),
 		// Generate HTML file that includes reference to bundled JS
 		new HtmlWebpackPlugin({
-			template: './src/index.html'
-		})
+			template: './src/index.html',
+			filename: 'index.html'
+		}),
+		// Provide polyfills for Node.js core modules
+		new webpack.ProvidePlugin({
+			process: 'process/browser',
+		}),
 	],
+	resolve: {
+		fallback: {
+			"path": require.resolve("path-browserify"),
+			"os": require.resolve("os-browserify/browser"),
+			"crypto": require.resolve("crypto-browserify"),
+			"buffer": require.resolve("buffer/"),
+			"stream": require.resolve("stream-browserify"),
+		}
+	},
 	devServer: {
 		static: {
 			directory: path.join(__dirname, 'dist'),

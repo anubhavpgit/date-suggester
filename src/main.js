@@ -1,23 +1,32 @@
-// Import dependencies
-import dotenv from 'dotenv';
-import { GoogleGenAI } from "@google/genai";
-
-// Load environment variables from .env file
-dotenv.config();
-
-// Get API key from environment variables
-const GEMINI_API = process.env.GEMINI_API_KEY;
-// If API key is missing, log a helpful error message
-if (!GEMINI_API) {
-	console.error('GEMINI_API_KEY not found in .env file. Please add it to use the Gemini API.');
-}
+// Import the Gemini API directly from CDN using the global variable
+// The script is already included in the HTML file
+// This avoids the need to import it as an ES module
 
 // Initialize variables
 let map;
 let userLocation = null;
 
-// Initialize the Google Generative AI client
-const genAI = new GoogleGenAI(GEMINI_API);
+// Function to initialize the Gemini API
+function initGeminiAPI() {
+	// Get API key from the environment variables
+	const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+	// If API key is missing, log a helpful error message
+	if (!GEMINI_API_KEY) {
+		console.error('GEMINI_API_KEY not found in environment variables. Please add it to your .env file.');
+		return null;
+	}
+
+	// Initialize the Google Generative AI client
+	try {
+		const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+		console.log('Gemini API initialized successfully');
+		return genAI;
+	} catch (error) {
+		console.error('Error initializing Gemini API:', error);
+		return null;
+	}
+}
 
 // Function to initialize the map
 function initMap(lat, lng) {
@@ -70,23 +79,33 @@ async function getLocationNameFromCoords(lat, lng) {
 // Function to generate date ideas using Gemini API
 async function generateDateIdeas(locationData, radius, preferences = {}) {
 	try {
+		// Initialize the Gemini API
+		const genAI = initGeminiAPI();
+		if (!genAI) {
+			throw new Error('Failed to initialize Gemini API');
+		}
+
 		// Get the Gemini model
-		const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+		const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 		// Create the prompt with all relevant information
 		let prompt = `Generate 5 unique and interesting date ideas near ${locationData.locationName} within ${radius} miles radius.`;
 
 		// Add any additional preferences to the prompt
+		if (preferences.dateType) {
+			prompt += ` Date type: ${preferences.dateType}.`;
+		}
+
 		if (preferences.budget) {
 			prompt += ` Budget: ${preferences.budget}.`;
 		}
 
-		if (preferences.activityType) {
-			prompt += ` Activity type: ${preferences.activityType}.`;
+		if (preferences.environment) {
+			prompt += ` Environment: ${preferences.environment}.`;
 		}
 
-		if (preferences.timeOfDay) {
-			prompt += ` Time of day: ${preferences.timeOfDay}.`;
+		if (preferences.relationshipStage) {
+			prompt += ` Relationship stage: ${preferences.relationshipStage}.`;
 		}
 
 		// Add request for real locations and specifics
@@ -109,38 +128,73 @@ async function generateDateIdeas(locationData, radius, preferences = {}) {
 
 // Function to display generated date ideas
 function displayDateIdeas(ideas) {
-	// Create a results container if it doesn't exist
-	let resultsContainer = document.getElementById('results-container');
-	if (!resultsContainer) {
-		resultsContainer = document.createElement('div');
-		resultsContainer.id = 'results-container';
-		resultsContainer.className = 'results-container';
-
-		// Insert the results container after the form
-		const formElement = document.querySelector('.form-actions');
-		formElement.parentNode.insertBefore(resultsContainer, formElement.nextSibling);
+	// Hide loading indicator
+	const loadingContainer = document.getElementById('loading');
+	if (loadingContainer) {
+		loadingContainer.style.display = 'none';
 	}
 
-	// Set the ideas as HTML content
-	resultsContainer.innerHTML = `
-    <h2>Your Date Ideas</h2>
-    <div class="date-ideas-content">
-      ${ideas.replace(/\n/g, '<br>')}
-    </div>
-  `;
+	// Show results container
+	const resultsContainer = document.getElementById('results');
+	if (resultsContainer) {
+		resultsContainer.style.display = 'block';
+	}
+
+	// Fill date ideas
+	const dateIdeasContainer = document.getElementById('date-ideas');
+	if (dateIdeasContainer) {
+		// Parse the ideas text and format it for display
+		const formattedIdeas = formatDateIdeas(ideas);
+		dateIdeasContainer.innerHTML = formattedIdeas;
+	}
 
 	// Scroll to results
 	resultsContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Function to format date ideas for display
+function formatDateIdeas(ideasText) {
+	// This is a simple implementation - you could enhance this
+	// to better parse and format the AI response
+	const ideas = ideasText.split(/\d+\./).filter(idea => idea.trim().length > 0);
+
+	let formattedHtml = '';
+
+	ideas.forEach(idea => {
+		// Try to extract a title - assume the first line is the title
+		const lines = idea.trim().split('\n');
+		const title = lines[0].trim();
+		const description = lines.slice(1).join('\n').trim();
+
+		formattedHtml += `
+      <div class="date-idea-card">
+        <div class="date-idea-image">Date Idea</div>
+        <div class="date-idea-content">
+          <h3 class="date-idea-title">${title}</h3>
+          <p class="date-idea-description">${description}</p>
+        </div>
+      </div>
+    `;
+	});
+
+	return formattedHtml;
 }
 
 // Function to gather form data
 function getFormData() {
 	const locationInput = document.getElementById('location-input').value;
 	const radius = document.getElementById('radius').value;
+	const dateType = document.getElementById('date-type').value;
+	const budget = document.getElementById('budget').value;
+	const environment = document.getElementById('environment').value;
+	const relationshipStage = document.getElementById('relationship-stage').value;
 
-	// You could add more form fields for preferences here
+	// Create preferences object
 	const preferences = {
-		// Add any additional preferences from your form
+		dateType,
+		budget,
+		environment,
+		relationshipStage
 	};
 
 	return { locationInput, radius, preferences };
@@ -151,8 +205,17 @@ async function handleGenerateClick(event) {
 	event.preventDefault();
 
 	const generateBtn = document.getElementById('generate-btn');
+	const loadingContainer = document.getElementById('loading');
+	const resultsContainer = document.getElementById('results');
 
 	// Show loading state
+	if (loadingContainer) {
+		loadingContainer.style.display = 'flex';
+	}
+	if (resultsContainer) {
+		resultsContainer.style.display = 'none';
+	}
+
 	generateBtn.textContent = 'Generating...';
 	generateBtn.disabled = true;
 
@@ -185,6 +248,11 @@ async function handleGenerateClick(event) {
 	} catch (error) {
 		console.error('Error:', error);
 		alert(`Error: ${error.message}`);
+
+		// Hide loading indicator on error
+		if (loadingContainer) {
+			loadingContainer.style.display = 'none';
+		}
 	} finally {
 		// Reset button state
 		generateBtn.textContent = 'Generate Date Ideas →';
@@ -194,7 +262,12 @@ async function handleGenerateClick(event) {
 
 // Event handler for the GPS button
 async function handleGpsClick() {
+	const gpsBtn = document.getElementById('use-gps-btn');
+
 	try {
+		// Add loading animation to the GPS button
+		gpsBtn.classList.add('gps-loading');
+
 		const position = await getCurrentLocation();
 		// Initialize map with the current location
 		initMap(position.lat, position.lng);
@@ -205,6 +278,22 @@ async function handleGpsClick() {
 	} catch (error) {
 		console.error('Error getting location:', error);
 		alert('Could not get your location. Please enter it manually.');
+	} finally {
+		// Remove loading animation
+		gpsBtn.classList.remove('gps-loading');
+	}
+}
+
+// Mobile menu toggle functionality
+function setupMobileMenu() {
+	const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+	const navLinks = document.querySelector('.nav-links');
+
+	if (mobileMenuToggle && navLinks) {
+		mobileMenuToggle.addEventListener('click', () => {
+			mobileMenuToggle.classList.toggle('active');
+			navLinks.classList.toggle('active');
+		});
 	}
 }
 
@@ -220,6 +309,9 @@ function setupDateIdeasGenerator() {
 	if (gpsBtn) {
 		gpsBtn.addEventListener('click', handleGpsClick);
 	}
+
+	// Set up mobile menu
+	setupMobileMenu();
 }
 
 // Initialize everything when the DOM is loaded

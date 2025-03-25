@@ -6,8 +6,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>YourMove.ai - AI-Powered Date Ideas</title>
 	<link rel="icon" type="image/svg+xml" href="./logo.svg">
-	<link rel="stylesheet" href="./style.css">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+	<link rel="stylesheet" href="./style.css">
+	<script src="https://cdn.jsdelivr.net/npm/@google/generative-ai@latest"></script>
+
 </head>
 
 <body>
@@ -33,7 +35,7 @@
 				<a href="https://yourmove.tolt.io/">Affiliate</a>
 			</nav>
 			<div class="nav-right">
-				<a href="#" class="btn-get-started">Get Started</a>
+				<a href="#date-generator" class="btn-get-started">Get Started</a>
 			</div>
 		</div>
 	</header>
@@ -239,11 +241,43 @@
 			</div>
 		</div>
 	</footer>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			// Get the hamburger menu button and navigation links
+			const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+			const navLinks = document.querySelector('.nav-links');
 
-	<script src="https://cdn.jsdelivr.net/npm/@google/generative-ai@latest"></script>
+			// Toggle menu when hamburger is clicked
+			mobileMenuToggle.addEventListener('click', function () {
+				// Toggle active class on the button (changes hamburger to X)
+				this.classList.toggle('active');
+				// Toggle the aria-expanded attribute for accessibility
+				const expanded = this.getAttribute('aria-expanded') === 'true' || false;
+				this.setAttribute('aria-expanded', !expanded);
+				// Toggle the nav menu visibility
+				navLinks.classList.toggle('active');
+			});
 
-	<!-- Import your module script -->
-	<script type="module" src="main.js"></script>
+			// Close menu when a link is clicked
+			const links = navLinks.querySelectorAll('a');
+			links.forEach(link => {
+				link.addEventListener('click', function () {
+					mobileMenuToggle.classList.remove('active');
+					mobileMenuToggle.setAttribute('aria-expanded', 'false');
+					navLinks.classList.remove('active');
+				});
+			});
+
+			// Close menu when clicking outside of it
+			document.addEventListener('click', function (event) {
+				if (!event.target.closest('.nav-links') && !event.target.closest('.mobile-menu-toggle')) {
+					mobileMenuToggle.classList.remove('active');
+					mobileMenuToggle.setAttribute('aria-expanded', 'false');
+					navLinks.classList.remove('active');
+				}
+			});
+		});
+	</script>
 </body>
 
 </html>
