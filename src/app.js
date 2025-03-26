@@ -12,9 +12,8 @@ window.YourMoveApp = {
 
 // Initialize the application when the DOM is loaded
 
-// Add this line to debug
-console.log('YourMoveApp initialized');
-
-// You could also add more detailed logging
-console.log('Main module loaded:', !!mainApp);
-console.log('Map module loaded:', !!mapModule);
+document.addEventListener('DOMContentLoaded', function () {
+	console.log('YourMoveApp initialized');
+	console.log('Main module loaded:', !!mainApp);
+	console.log('Map module loaded:', !!mapModule);
+});
