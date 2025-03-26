@@ -113,10 +113,10 @@ async function generateDateIdeas(locationData, radius, preferences = {}) {
 			throw new Error('Failed to initialize Gemini API');
 		}
 
-		const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+		const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 		// Base prompt as before
-		let prompt = `Generate 5 unique and interesting date ideas near ${locationData.locationName} within ${radius} miles radius.`;
+		let prompt = `Generate 6 unique and interesting date ideas near ${locationData.locationName} within ${radius} miles radius.`;
 
 		// Add preferences to prompt as before
 		if (preferences.dateType) prompt += ` Date type: ${preferences.dateType}.`;
@@ -137,7 +137,7 @@ Please return your response in ONLY the following JSON format without any additi
       "address": "Full address if available",
       "cost": "Estimated cost or cost range"
     },
-    ... more ideas (5 more total)
+    ... more ideas ( total 6 ideas ) ...
   ]
 }
 Include real locations and venues when possible. Make sure the output is valid JSON.`;
@@ -190,7 +190,7 @@ function parseAIResponse(responseText) {
 			.map(idea => {
 				const lines = idea.trim().split('\n');
 				return {
-					title: lines[0] || 'Date Idea',
+					// title: lines[0] || 'Date Idea',
 					description: lines.slice(1).join('\n').trim() || 'No description available',
 					location: 'N/A',
 					address: 'N/A',
@@ -238,7 +238,6 @@ function displayDateIdeas(responseData) {
 		ideasData.ideas.forEach((idea, i) => {
 			html += `
         <div class="date-idea-card">
-          <div class="date-idea-image">Date Idea</div>
           <div class="date-idea-content">
             <h3 class="date-idea-title">${i + 1}. ${escapeHtml(idea.title)}</h3>
             <p class="date-idea-description">${escapeHtml(idea.description)}</p>

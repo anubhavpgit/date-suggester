@@ -84,8 +84,8 @@ a {
 }
 
 .btn-get-started {
-	background-color: var(--white);
-	color: var(--primary-color);
+	background-color: var(--primary-color);
+	color: var(--white);
 	padding: 8px 16px;
 	border-radius: var(--border-radius);
 	text-decoration: none;
@@ -95,6 +95,21 @@ a {
 
 .btn-get-started:hover {
 	background-color: rgba(255, 255, 255, 0.9);
+	transform: translateY(-2px);
+	color: var(--text-color);
+}
+
+.btn-get-ideas {
+	background-color: var(--primary-color);
+	color: var(--white);
+	padding: 8px 16px;
+	border-radius: var(--border-radius);
+	text-decoration: none;
+	font-weight: 600;
+	transition: var(--transition);
+}
+
+.btn-get-ideas:hover {
 	transform: translateY(-2px);
 }
 
@@ -133,7 +148,7 @@ h1 {
 
 /* Section styles */
 section {
-	padding: 80px 0;
+	padding: 80px 80px 20px 80px;
 }
 
 .section-header {
@@ -398,8 +413,8 @@ label {
 
 /* Callout Section */
 .callout-section {
-	background-color: var(--primary-color);
-	color: var(--white);
+	background-color: var(--white);
+	color: var(--text-color);
 	text-align: center;
 	padding: 60px 0;
 }
@@ -417,7 +432,7 @@ label {
 	margin-right: auto;
 }
 
-.callout-section .btn-get-started {
+.callout-section .btn-get-ideas {
 	display: inline-block;
 	padding: 14px 28px;
 	font-size: 1.1rem;
@@ -510,7 +525,8 @@ label {
 	}
 
 	.btn,
-	.btn-get-started {
+	.btn-get-started,
+	.btn-get-ideas {
 		width: 100%;
 	}
 }
