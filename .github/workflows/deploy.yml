@@ -35,6 +35,10 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           MAP_API: ${{ secrets.MAPS_API_KEY }}
+				run: |
+					echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+					echo "MAP_API=$MAP_API" >> .env
+        	cat .env
         run: npm run build
         
       - name: Setup Pages
