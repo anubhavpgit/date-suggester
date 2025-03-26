@@ -137,7 +137,7 @@ Please return your response in ONLY the following JSON format without any additi
       "address": "Full address if available",
       "cost": "Estimated cost or cost range"
     },
-    ... more ideas (4 more total)
+    ... more ideas (5 more total)
   ]
 }
 Include real locations and venues when possible. Make sure the output is valid JSON.`;
@@ -365,7 +365,6 @@ async function handleGenerateClick(event) {
 
 		// Generate date ideas
 		const response = await generateDateIdeas(locationData, radius, preferences);
-		console.log('Generated response:', response);
 		displayDateIdeas(response);
 
 	} catch (error) {
