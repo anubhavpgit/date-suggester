@@ -354,6 +354,11 @@ label {
 	font-weight: 500;
 }
 
+.date-idea-item {
+	font-weight: 500;
+	margin-bottom: 1rem;
+}
+
 /* Testimonials Section */
 .testimonials {
 	background-color: #f9f9f9;

@@ -235,12 +235,12 @@ function displayDateIdeas(responseData) {
 	if (dateIdeasContainer && ideasData.ideas) {
 		let html = '';
 
-		ideasData.ideas.forEach(idea => {
+		ideasData.ideas.forEach((idea, i) => {
 			html += `
         <div class="date-idea-card">
           <div class="date-idea-image">Date Idea</div>
           <div class="date-idea-content">
-            <h3 class="date-idea-title">${escapeHtml(idea.title)}</h3>
+            <h3 class="date-idea-title">${i + 1}. ${escapeHtml(idea.title)}</h3>
             <p class="date-idea-description">${escapeHtml(idea.description)}</p>
             
             <div class="date-idea-details">
