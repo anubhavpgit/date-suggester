@@ -78,10 +78,9 @@
 		<section class="hero">
 			<div class="container">
 				<div class="hero-content">
-					<h1>Your perfect date is just a click away</h1>
+					<h1>Date Idea Generator</h1>
 					<p class="hero-text">
-						We <span class="brand-name">create personalized date ideas</span> just for you. Spend less time <span
-							class="highlight"> planning</span>, and more time <span class="highlight"> connecting</span>.
+						Get <span class="brand-name">top date ideas</span> for any city, budget and vibe.
 					</p>
 				</div>
 			</div>
@@ -95,8 +94,9 @@
 						<h3 class="form-section-title">Basic Preferences</h3>
 						<div class="form-row">
 							<div class="form-group">
-								<label for="date-type">Date Type</label>
+								<label for="date-type">Vibe</label>
 								<select id="date-type" class="form-control">
+									<option value="all">All</option>
 									<option value="romantic">Romantic</option>
 									<option value="casual">Casual</option>
 									<option value="adventure">Adventure</option>
@@ -107,6 +107,7 @@
 							<div class="form-group">
 								<label for="budget">Budget</label>
 								<select id="budget" class="form-control">
+									<option value="all">All</option>
 									<option value="free">Free</option>
 									<option value="low">Budget-Friendly ($)</option>
 									<option value="medium">Mid-Range ($$)</option>
@@ -118,6 +119,7 @@
 							<div class="form-group">
 								<label for="environment">Environment</label>
 								<select id="environment" class="form-control">
+									<option value="all">All</option>
 									<option value="indoor">Indoor</option>
 									<option value="outdoor">Outdoor</option>
 									<option value="both">Both</option>
@@ -126,6 +128,7 @@
 							<div class="form-group">
 								<label for="relationship-stage">Relationship Stage</label>
 								<select id="relationship-stage" class="form-control">
+									<option value="all">All</option>
 									<option value="first-date">First Date</option>
 									<option value="casual-dating">Casual Dating</option>
 									<option value="serious">Serious Relationship</option>
@@ -156,7 +159,7 @@
 									<label for="radius">Search Radius</label>
 									<select id="radius" class="form-control">
 										<option value="5">5 miles</option>
-										<option value="10" selected>10 miles</option>
+										<option value="10">10 miles</option>
 										<option value="20">20 miles</option>
 										<option value="50">50 miles</option>
 									</select>
