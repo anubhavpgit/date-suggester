@@ -115,8 +115,8 @@ a {
 
 /* Hero Section */
 .hero {
-	padding: 80px 0;
-	/* padding-bottom: 80px; */
+	margin-top: 80px;
+	padding-bottom: 80px;
 	text-align: center;
 	background-color: var(--white);
 }
