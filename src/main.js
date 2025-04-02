@@ -261,8 +261,32 @@ function displayDateIdeas(responseData) {
 	}
 
 	// Scroll to results
-	resultsContainer.scrollIntoView({ behavior: 'smooth' });
+	if (isInIframe()) {
+		console.log('Working at Yourmove :)');
+		// If in an iframe, notify parent about the results position
+		const resultsPosition = resultsContainer.getBoundingClientRect().top;
+
+		// Send both height AND scroll position to parent
+		window.parent.postMessage({
+			type: 'iframe-action',
+			height: document.body.scrollHeight,
+			scrollTo: resultsPosition
+		}, '*');
+	} else {
+		// Normal scrolling for standalone page
+		resultsContainer.scrollIntoView({ behavior: 'smooth' });
+	}
 }
+
+// Helper function to check if in iframe
+function isInIframe() {
+	try {
+		return window.self !== window.top;
+	} catch (e) {
+		return true;
+	}
+}
+
 
 // Helper function to prevent XSS
 function escapeHtml(str) {
