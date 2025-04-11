@@ -123,34 +123,59 @@ async function generateDateIdeas(locationData, radius, preferences = {}) {
 		if (preferences.budget) prompt += ` Budget: ${preferences.budget}.`;
 		if (preferences.environment) prompt += ` Environment: ${preferences.environment}.`;
 		if (preferences.relationshipStage) prompt += ` Relationship stage: ${preferences.relationshipStage}.`;
+		if (preferences.additionalPreferences) prompt += ` Additional preferences: ${preferences.additionalPreferences}.`;
 
 		// Add specific instructions for JSON format
 		prompt += `
 Please return your response in ONLY the following JSON format without any additional text:
 {
-  "analysis": "A brief analysis of the date ideas based on location and preferences",
+  "analysis": "A brief analysis of the date ideas based on location and preferences (30-40 words)",
   "ideas": [
     {
-      "title": "Descriptive title for the date idea",
-      "description": "Detailed description including what makes this special",
-      "location": "Specific venue name if applicable",
+      "title": "Title should be "exactly" 5-6 words long",
+      "description": "Description should be exactly 60-62 words long. Make sure all descriptions are approximately the same length to ensure uniform display in the user interface.",
+      "location": "Specific venue name if applicable (3-5 words)",
       "address": "Full address if available",
-      "cost": "Estimated cost or cost range"
+      "cost": "Estimated cost or cost range (keep format consistent)",
+      "citation": {
+        "source": "Source name or website (keep under 5 words)",
+        "url": "URL to the source",
+        "snippet": "Keep all snippets to exactly 15-20 words. They should be authentic quotes that highlight the venue or activity."
+      }
     },
-    ... more ideas ( total 6 ideas ) ...
+    ... more ideas (total 6 ideas) ...
   ]
 }
-Include real locations and venues when possible. Make sure the output is valid JSON.`;
+Include real locations and venues when possible. Make sure the output is valid JSON. Consistency in length for titles and descriptions is crucial for UI display purposes. If a section would be empty or N/A, include it anyway with "N/A" as the value.`;
 
 		// Generate content
 		const result = await model.generateContent({
 			contents: [{ role: "user", parts: [{ text: prompt }] }],
 		});
 
-		// Parse JSON from the response
-		const responseText = result.response.text();
+		// Get the response text
+		let responseText = result.response.candidates[0].content.parts[0].text;
 
-		return JSON.parse(removeMarkdownCodeBlock(responseText));
+		// Parse JSON from the response
+		const responseData = JSON.parse(removeMarkdownCodeBlock(responseText));
+
+		if (result.response.candidates[0].metadata) {
+			console.log(result.response.candidates[0].metadata);	
+			const searchResults = result.response.candidates[0].metadata.searchEntryPoint.renderedContent;
+			console.log(searchResults);	
+			responseData.ideas.forEach((idea, index) => {
+				if (searchResults && searchResults[index]) {
+					// Use the URL from the parsed JSON if available, otherwise use the search result URL
+					idea.citation = {
+						source: idea.citation?.source || searchResults[index].source,
+						url: idea.citation?.url || searchResults[index].url,
+						snippet: idea.citation?.snippet || searchResults[index].snippet
+					};
+				}
+			});
+		}
+
+		return responseData;
 	} catch (error) {
 		console.error('Error generating date ideas:', error);
 		throw error;
@@ -209,75 +234,89 @@ function parseAIResponse(responseText) {
 function displayDateIdeas(responseData) {
 	// Parse the response if it's not already parsed
 	const ideasData = typeof responseData === 'string'
-		? parseAIResponse(responseData)
-		: responseData;
-
+	  ? parseAIResponse(responseData)
+	  : responseData;
+  
 	// Hide loading indicator
 	const loadingContainer = document.getElementById('loading');
 	if (loadingContainer) {
-		loadingContainer.style.display = 'none';
+	  loadingContainer.style.display = 'none';
 	}
-
+  
 	// Show results container
 	const resultsContainer = document.getElementById('results');
 	if (resultsContainer) {
-		resultsContainer.style.display = 'block';
+	  resultsContainer.style.display = 'block';
 	}
-
+  
 	// Update subheader with analysis
 	const resultsSubheader = document.querySelector('.results-subheader');
 	if (resultsSubheader && ideasData.analysis) {
-		resultsSubheader.textContent = ideasData.analysis;
+	  resultsSubheader.textContent = ideasData.analysis;
 	}
-
+  
 	// Fill date ideas
 	const dateIdeasContainer = document.getElementById('date-ideas');
 	if (dateIdeasContainer && ideasData.ideas) {
-		let html = '';
-
-		ideasData.ideas.forEach((idea, i) => {
-			html += `
-        <div class="date-idea-card">
-          <div class="date-idea-content">
-            <h3 class="date-idea-title">${i + 1}. ${escapeHtml(idea.title)}</h3>
-            <p class="date-idea-description">${escapeHtml(idea.description)}</p>
-            
-            <div class="date-idea-details">
-              ${idea.location && idea.location !== 'N/A' ?
+	  let html = '';
+  
+	  ideasData.ideas.forEach((idea, i) => {
+		html += `
+		  <div class="date-idea-card">
+			<div class="date-idea-content">
+			  <h3 class="date-idea-title">${i + 1}. ${escapeHtml(idea.title)}</h3>
+			  <p class="date-idea-description">${escapeHtml(idea.description)}</p>
+			  
+			  <!-- Using display: contents in CSS so these divs participate in the grid layout -->
+			  <div class="date-idea-info">
+				<div class="date-idea-details">
+				  ${idea.location && idea.location !== 'N/A' ?
 					`<p><strong>Location:</strong> ${escapeHtml(idea.location)}</p>` : ''}
-              
-              ${idea.address && idea.address !== 'N/A' ?
+				  
+				  ${idea.address && idea.address !== 'N/A' ?
 					`<p><strong>Address:</strong> ${escapeHtml(idea.address)}</p>` : ''}
-              
-              ${idea.cost && idea.cost !== 'N/A' ?
+				  
+				  ${idea.cost && idea.cost !== 'N/A' ?
 					`<p><strong>Cost:</strong> ${escapeHtml(idea.cost)}</p>` : ''}
-            </div>
-          </div>
-        </div>
-      `;
-		});
-
-		dateIdeasContainer.innerHTML = html;
+				</div>
+				
+				<div class="date-idea-citation">
+				  ${idea.citation && idea.citation.snippet ? 
+					`<span class="citation-snippet">"${escapeHtml(idea.citation.snippet)}"</span>` : ''}
+				  
+				  <div class="citation-source">
+					${idea.citation ? 
+					  `<span>Source: ${escapeHtml(idea.citation.source || 'Unknown')}</span>` : ''}
+					
+					${idea.citation && idea.citation.url ? 
+					  `<a href="${escapeHtml(idea.citation.url)}" target="_blank" rel="noopener noreferrer" class="citation-link">
+						Learn More →
+					  </a>` : ''}
+				  </div>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		`;
+	  });
+  
+	  dateIdeasContainer.innerHTML = html;
 	}
-
+  
 	// Scroll to results
 	if (isInIframe()) {
-		console.log('Working at Yourmove :)');
-		// If in an iframe, notify parent about the results position
-		const resultsPosition = resultsContainer.getBoundingClientRect().top;
-
-		// Send both height AND scroll position to parent
-		window.parent.postMessage({
-			type: 'iframe-action',
-			height: document.body.scrollHeight,
-			scrollTo: resultsPosition
-		}, '*');
+	  // If in an iframe, notify parent about the results position
+	  const resultsPosition = resultsContainer.getBoundingClientRect().top;
+	  window.parent.postMessage({
+		type: 'iframe-action',
+		height: document.body.scrollHeight,
+		scrollTo: resultsPosition
+	  }, '*');
 	} else {
-		// Normal scrolling for standalone page
-		resultsContainer.scrollIntoView({ behavior: 'smooth' });
+	  // Normal scrolling for standalone page
+	  resultsContainer.scrollIntoView({ behavior: 'smooth' });
 	}
-}
-
+  }
 // Helper function to check if in iframe
 function isInIframe() {
 	try {
@@ -334,13 +373,15 @@ function getFormData() {
 	const budget = document.getElementById('budget').value;
 	const environment = document.getElementById('environment').value;
 	const relationshipStage = document.getElementById('relationship-stage').value;
+	const additionalPreferences = document.getElementById('additional-preferences').value;
 
 	// Create preferences object
 	const preferences = {
 		dateType,
 		budget,
 		environment,
-		relationshipStage
+		relationshipStage,
+		additionalPreferences
 	};
 
 	return { locationInput, radius, preferences };
@@ -433,6 +474,21 @@ function setupDateIdeasGenerator() {
 
 	// Set up mobile menu
 	setupMobileMenu();
+
+	// Set default location to New York
+	const defaultLocation = {
+		lat: 40.7128,
+		lng: -74.0060,
+		locationName: "New York, NY"
+	};
+	userLocation = defaultLocation;
+	initMap(defaultLocation.lat, defaultLocation.lng);
+	
+	// Set the location input field value
+	const locationInput = document.getElementById('location-input');
+	if (locationInput) {
+		locationInput.value = defaultLocation.locationName;
+	}
 }
 
 // Initialize everything when the DOM is loaded
