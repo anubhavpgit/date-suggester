@@ -157,39 +157,65 @@ Include real locations and venues when possible. Make sure the output is valid J
 		let responseText = result.response.candidates[0].content.parts[0].text;
 
 		// Parse JSON from the response
-		const responseData = JSON.parse(removeMarkdownCodeBlock(responseText));
+		try {
+			const responseData = JSON.parse(removeMarkdownCodeBlock(responseText));
+			if (result.response.candidates[0].metadata) {
+				console.log(result.response.candidates[0].metadata);
+				const searchResults = result.response.candidates[0].metadata.searchEntryPoint.renderedContent;
+				console.log(searchResults);
+				responseData.ideas.forEach((idea, index) => {
+					if (searchResults && searchResults[index]) {
+						// Use the URL from the parsed JSON if available, otherwise use the search result URL
+						idea.citation = {
+							source: idea.citation?.source || searchResults[index].source,
+							url: idea.citation?.url || searchResults[index].url,
+							snippet: idea.citation?.snippet || searchResults[index].snippet
+						};
+					}
+				});
+			}
 
-		if (result.response.candidates[0].metadata) {
-			console.log(result.response.candidates[0].metadata);	
-			const searchResults = result.response.candidates[0].metadata.searchEntryPoint.renderedContent;
-			console.log(searchResults);	
-			responseData.ideas.forEach((idea, index) => {
-				if (searchResults && searchResults[index]) {
-					// Use the URL from the parsed JSON if available, otherwise use the search result URL
-					idea.citation = {
-						source: idea.citation?.source || searchResults[index].source,
-						url: idea.citation?.url || searchResults[index].url,
-						snippet: idea.citation?.snippet || searchResults[index].snippet
-					};
-				}
-			});
+			return responseData;
+			// ... continue processing
+		} catch (error) {
+			console.error('Error parsing JSON:', error);
+			// Log the problematic responseText to examine it
+			console.log('Problematic response:', responseText);
+			// Fall back to the text parsing approach
+			return parseAIResponse(responseText);
 		}
-
-		return responseData;
 	} catch (error) {
 		console.error('Error generating date ideas:', error);
 		throw error;
 	}
 }
 
+function sanitizeJsonString(str) {
+	// Replace control characters that aren't properly escaped
+	return str
+		.replace(/[\u0000-\u001F\u007F-\u009F]/g, match => {
+			// Convert control characters to their escaped version
+			switch (match) {
+				case '\b': return '\\b';
+				case '\f': return '\\f';
+				case '\n': return '\\n';
+				case '\r': return '\\r';
+				case '\t': return '\\t';
+				default:
+					// For other control characters, use Unicode escape
+					const hex = match.charCodeAt(0).toString(16).padStart(4, '0');
+					return `\\u${hex}`;
+			}
+		});
+}
+// Then modify your parsing function
 function removeMarkdownCodeBlock(text) {
 	// Remove the opening ```json (and any whitespace after it)
 	let cleanedText = text.replace(/^```json\s*/m, '');
-
 	// Remove the closing ``` (and any whitespace before it)
 	cleanedText = cleanedText.replace(/\s*```$/m, '');
-
-	return cleanedText;
+	// Sanitize the JSON string
+	return sanitizeJsonString(cleanedText);
 }
 
 // Add this function to handle parsing the response
@@ -234,34 +260,34 @@ function parseAIResponse(responseText) {
 function displayDateIdeas(responseData) {
 	// Parse the response if it's not already parsed
 	const ideasData = typeof responseData === 'string'
-	  ? parseAIResponse(responseData)
-	  : responseData;
-  
+		? parseAIResponse(responseData)
+		: responseData;
+
 	// Hide loading indicator
 	const loadingContainer = document.getElementById('loading');
 	if (loadingContainer) {
-	  loadingContainer.style.display = 'none';
+		loadingContainer.style.display = 'none';
 	}
-  
+
 	// Show results container
 	const resultsContainer = document.getElementById('results');
 	if (resultsContainer) {
-	  resultsContainer.style.display = 'block';
+		resultsContainer.style.display = 'block';
 	}
-  
+
 	// Update subheader with analysis
 	const resultsSubheader = document.querySelector('.results-subheader');
 	if (resultsSubheader && ideasData.analysis) {
-	  resultsSubheader.textContent = ideasData.analysis;
+		resultsSubheader.textContent = ideasData.analysis;
 	}
-  
+
 	// Fill date ideas
 	const dateIdeasContainer = document.getElementById('date-ideas');
 	if (dateIdeasContainer && ideasData.ideas) {
-	  let html = '';
-  
-	  ideasData.ideas.forEach((idea, i) => {
-		html += `
+		let html = '';
+
+		ideasData.ideas.forEach((idea, i) => {
+			html += `
 		  <div class="date-idea-card">
 			<div class="date-idea-content">
 			  <h3 class="date-idea-title">${i + 1}. ${escapeHtml(idea.title)}</h3>
@@ -281,15 +307,15 @@ function displayDateIdeas(responseData) {
 				</div>
 				
 				<div class="date-idea-citation">
-				  ${idea.citation && idea.citation.snippet ? 
+				  ${idea.citation && idea.citation.snippet ?
 					`<span class="citation-snippet">"${escapeHtml(idea.citation.snippet)}"</span>` : ''}
 				  
 				  <div class="citation-source">
-					${idea.citation ? 
-					  `<span>Source: ${escapeHtml(idea.citation.source || 'Unknown')}</span>` : ''}
+					${idea.citation ?
+					`<span>Source: ${escapeHtml(idea.citation.source || 'Unknown')}</span>` : ''}
 					
-					${idea.citation && idea.citation.url ? 
-					  `<a href="${escapeHtml(idea.citation.url)}" target="_blank" rel="noopener noreferrer" class="citation-link">
+					${idea.citation && idea.citation.url ?
+					`<a href="${escapeHtml(idea.citation.url)}" target="_blank" rel="noopener noreferrer" class="citation-link">
 						Learn More →
 					  </a>` : ''}
 				  </div>
@@ -298,25 +324,25 @@ function displayDateIdeas(responseData) {
 			</div>
 		  </div>
 		`;
-	  });
-  
-	  dateIdeasContainer.innerHTML = html;
+		});
+
+		dateIdeasContainer.innerHTML = html;
 	}
-  
+
 	// Scroll to results
 	if (isInIframe()) {
-	  // If in an iframe, notify parent about the results position
-	  const resultsPosition = resultsContainer.getBoundingClientRect().top;
-	  window.parent.postMessage({
-		type: 'iframe-action',
-		height: document.body.scrollHeight,
-		scrollTo: resultsPosition
-	  }, '*');
+		// If in an iframe, notify parent about the results position
+		const resultsPosition = resultsContainer.getBoundingClientRect().top;
+		window.parent.postMessage({
+			type: 'iframe-action',
+			height: document.body.scrollHeight,
+			scrollTo: resultsPosition
+		}, '*');
 	} else {
-	  // Normal scrolling for standalone page
-	  resultsContainer.scrollIntoView({ behavior: 'smooth' });
+		// Normal scrolling for standalone page
+		resultsContainer.scrollIntoView({ behavior: 'smooth' });
 	}
-  }
+}
 // Helper function to check if in iframe
 function isInIframe() {
 	try {
@@ -483,7 +509,7 @@ function setupDateIdeasGenerator() {
 	};
 	userLocation = defaultLocation;
 	initMap(defaultLocation.lat, defaultLocation.lng);
-	
+
 	// Set the location input field value
 	const locationInput = document.getElementById('location-input');
 	if (locationInput) {
